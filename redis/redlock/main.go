@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Learning/redis/client"
 	"context"
 	"crypto/rand"
 	_ "embed"
@@ -93,19 +94,19 @@ func (r *RedMutex) release(ctx context.Context) (bool, error) {
 }
 
 func main() {
-	client := redis.NewClient(&redis.Options{Addr: "192.168.182.132:6379"})
-	_, err := client.Ping(context.Background()).Result()
-	if err != nil {
-		panic(err)
-	}
-	//result, err := client.SetNX(context.Background(), "lock", "test", time.Hour).Result()
+	//client := redis.NewClient(&redis.Options{Addr: "192.168.182.132:6379"})
+	//_, err := client.Ping(context.Background()).Result()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//result, err := client.Client.SetNX(context.Background(), "lock", "test", time.Hour).Result()
 	//if err != nil {
 	//	panic(err)
 	//}
 	//fmt.Println(result)
 	bytes, _ := os.ReadFile("./lock/lua/unlock.lua")
 	script := redis.NewScript(string(bytes))
-	result, err := script.Eval(context.Background(), client, []string{"lock"}, "test").Result()
+	result, err := script.Eval(context.Background(), client.Redis, []string{"lock"}, "test").Result()
 	if err != nil {
 		panic(err)
 	}

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"Learning/redis/client"
+	"context"
 	_ "embed"
 	"fmt"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
@@ -68,32 +70,31 @@ func New(rds *redis.Client, key string, startTs, endTs int64, expiration time.Du
 var addScript string
 
 func main() {
-	client := redis.NewClient(&redis.Options{Addr: "192.168.182.132:6379"})
-	zRanking, err := New(client, "test", time.Now().Add(-3*time.Hour).Unix(), time.Now().Add((30*24-3)*time.Hour).Unix(), time.Hour)
+	zRanking, err := New(client.Redis, "test", time.Now().Add(-3*time.Hour).Unix(), time.Now().Add((30*24-3)*time.Hour).Unix(), time.Hour)
 	if err != nil {
 		return
 	}
 	script := redis.NewScript(addScript)
-	i, err := script.Eval(zRanking.Redis, []string{"test"}, 4, 1).Result()
+	i, err := script.Eval(context.Background(), zRanking.Redis, []string{"test"}, 4, 1).Result()
 	fmt.Println(i)
-	//zs, err := zRanking.Redis.ZRevRangeWithScores("test", 0, 9).Result()
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(zs)
-	//t, err := zRanking.Redis.ZRevRank("test", "4").Result()
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(t)
-	f, err := zRanking.Redis.ZScore("test", "4").Result()
+	zs, err := zRanking.Redis.ZRevRangeWithScores(context.Background(), "test", 0, 9).Result()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(zs)
+	t, err := zRanking.Redis.ZRevRank(context.Background(), "test", "4").Result()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(t)
+	f, err := zRanking.Redis.ZScore(context.Background(), "test", "4").Result()
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(f)
-	//result, err := zRanking.Redis.ZCard("test").Result()
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(result)
+	result, err := zRanking.Redis.ZCard(context.Background(), "test").Result()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(result)
 }

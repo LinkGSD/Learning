@@ -1,0 +1,51 @@
+syntax = "proto3";
+package pb;
+import "google/protobuf/empty.proto";
+option go_package = "/pb";
+
+message Student {
+  string name = 1;
+  bool male = 2;
+  repeated int32 scores = 3;
+}
+
+enum Grade{
+  FirstGrade = 0;
+  SecondGrade = 1;
+
+  ThirdGrade = 2;
+  FourthGrade = 3;
+
+  FifthGrade = 4;
+  SixthGrade = 5;
+}
+
+message Class {
+  repeated Student students = 1;
+  Grade grade = 2;
+  int32 class = 3;
+}
+
+message School {
+  repeated Class classes = 1;
+  string name = 2;
+}
+
+service GetSchool{
+   rpc GetSchool (GetSchoolRequest) returns (GetSchoolResponse);
+   rpc GetStudents(google.protobuf.Empty) returns (stream Student);
+   rpc SendStudents(stream Student) returns (WebResponse);
+}
+message GetSchoolRequest {
+  string name = 1;
+}
+message GetSchoolResponse {
+  int32 code = 1;
+  School data = 2;
+  string message = 3;
+}
+message WebResponse{
+  int32 code = 1;
+  string message = 2;
+}
+
